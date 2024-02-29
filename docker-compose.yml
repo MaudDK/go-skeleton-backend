@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  
+  backend:
+    container_name: go-backend
+    image: go-backend:1.0.0
+    build:
+      context: ./backend
+      dockerfile: go.dockerfile
+    environment:
+      DATABASE_URL: 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}'
+      PORT: ${PORT}
+      STAGE: ${STAGE}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata: {}
